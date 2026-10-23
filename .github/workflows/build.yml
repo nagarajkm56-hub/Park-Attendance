@@ -23,30 +23,25 @@ jobs:
 
       - name: Generate Android Skeleton & Integrate Code
         run: |
-          # 1. Create a clean Flutter project template
-          flutter create --org com.example park_app
-          
-          # 2. Copy your custom main.dart into the new project
+          flutter create --org com.attendance park_app
           cp lib/main.dart park_app/lib/main.dart
-
-          # 3. Add the required dependencies cleanly
           cd park_app
           flutter pub add camera geolocator intl http path_provider cupertino_icons
-
-          # 4. Add Camera & Location permissions into AndroidManifest.xml
+          
+          # Inject Camera, Location & Storage permissions
           sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
-
-          # 5. Set minimum SDK to 21 for camera support
+          
+          # Set minSdk to 21
           sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle || true
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle || true
 
-      - name: Build APK
+      - name: Build Debug APK
         run: |
           cd park_app
-          flutter build apk --release
+          flutter build apk --debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: park-attendance-release
-          path: park_app/build/app/outputs/flutter-apk/app-release.apk
+          name: park-attendance-installable
+          path: park_app/build/app/outputs/flutter-apk/app-debug.apk
